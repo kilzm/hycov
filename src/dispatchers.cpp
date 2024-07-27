@@ -487,10 +487,10 @@ void dispatch_leaveoverview(std::string arg)
 	for (auto &n : g_hycov_OvGridLayout->m_lOvGridNodesData)
 	{	
 		//make all window restore it's style
-    	n.pWindow->m_sSpecialRenderData.border   = n.ovbk_windowIsWithBorder;
-    	n.pWindow->m_sSpecialRenderData.decorate = n.ovbk_windowIsWithDecorate;
-    	n.pWindow->m_sSpecialRenderData.rounding = n.ovbk_windowIsWithRounding;
-    	n.pWindow->m_sSpecialRenderData.shadow   = n.ovbk_windowIsWithShadow;
+        n.pWindow->m_sWindowData.noBorder = n.ovbk_windowIsWithoutBorder;
+        n.pWindow->m_sWindowData.decorate = n.ovbk_windowIsWithDecorate;
+        n.pWindow->m_sWindowData.noRounding = n.ovbk_windowIsWithoutRounding;
+        n.pWindow->m_sWindowData.noShadow = n.ovbk_windowIsWithoutShadow;
 
 		if (n.ovbk_windowIsFloating)
 		{

@@ -105,7 +105,7 @@ void OvGridLayout::onWindowCreatedTiling(PHLWINDOW pWindow, eDirection direction
     
     //record the window stats which are used by restore
     pNode->ovbk_windowMonitorId = pWindow->m_iMonitorID;
-    pNode->ovbk_windowWorkspaceId = pWindow->m_pWorkspace->m_iID;
+    pNode->ovbk_windowWorkspaceId = pWindow->workspaceID();
     pNode->ovbk_windowFullscreenMode  = pWindowOriWorkspace->m_efFullscreenMode;
     pNode->ovbk_position = pWindow->m_vRealPosition.goal();
     pNode->ovbk_size = pWindow->m_vRealSize.goal();
@@ -114,10 +114,10 @@ void OvGridLayout::onWindowCreatedTiling(PHLWINDOW pWindow, eDirection direction
     pNode->ovbk_windowWorkspaceName = pWindowOriWorkspace->m_szName;
 
     //record the window style which are used by restore
-    pNode->ovbk_windowIsWithBorder = pWindow->m_sSpecialRenderData.border;
-    pNode->ovbk_windowIsWithDecorate = pWindow->m_sSpecialRenderData.decorate;
-    pNode->ovbk_windowIsWithRounding = pWindow->m_sSpecialRenderData.rounding;
-    pNode->ovbk_windowIsWithShadow = pWindow->m_sSpecialRenderData.shadow;
+    pNode->ovbk_windowIsWithoutBorder = pWindow->m_sWindowData.noBorder.valueOr(false);
+    pNode->ovbk_windowIsWithDecorate = pWindow->m_sWindowData.decorate.valueOr(true);
+    pNode->ovbk_windowIsWithoutRounding = pWindow->m_sWindowData.noRounding.valueOr(false);
+    pNode->ovbk_windowIsWithoutShadow = pWindow->m_sWindowData.noShadow.valueOr(false);
 
 
     //change all client(exclude special workspace) to active worksapce 
@@ -425,8 +425,8 @@ void OvGridLayout::applyNodeDataToWindow(SOvGridNodeData *pNode)
     // pWindow->m_sSpecialRenderData.shadow   = false;
 
     // force enable bordear and rounding
-    pWindow->m_sSpecialRenderData.border   = true;
-    pWindow->m_sSpecialRenderData.rounding = true;
+    pWindow->m_sWindowData.noBorder   = false;
+    pWindow->m_sWindowData.noRounding = false;
 
     pWindow->m_vSize = pNode->size;
     pWindow->m_vPosition = pNode->position;

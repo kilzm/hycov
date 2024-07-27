@@ -17,10 +17,10 @@ struct SOvGridNodeData
   Vector2D ovbk_size;
   Vector2D position;
   Vector2D size;
-  bool ovbk_windowIsWithBorder;
+  bool ovbk_windowIsWithoutBorder;
   bool ovbk_windowIsWithDecorate;
-  bool ovbk_windowIsWithRounding;
-  bool ovbk_windowIsWithShadow;
+  bool ovbk_windowIsWithoutRounding;
+  bool ovbk_windowIsWithoutShadow;
   bool isInOldLayout = false;
   bool isGroupActive = false;
 
