@@ -5,12 +5,14 @@
 #include <set>
 #include <hyprland/src/SharedDefs.hpp>
 #include "OvGridLayout.hpp"
+#include "src/devices/IPointer.hpp"
+#include <aquamarine/input/Input.hpp>
 
 // std::unique_ptr<HOOK_CALLBACK_FN> mouseMoveHookPtr = std::make_unique<HOOK_CALLBACK_FN>(mouseMoveHook);
 // std::unique_ptr<HOOK_CALLBACK_FN> mouseButtonHookPtr = std::make_unique<HOOK_CALLBACK_FN>(mouseButtonHook);
-typedef void (*origOnSwipeBegin)(void*, wlr_pointer_swipe_begin_event* e);
-typedef void (*origOnSwipeEnd)(void*, wlr_pointer_swipe_end_event* e);
-typedef void (*origOnSwipeUpdate)(void*, wlr_pointer_swipe_update_event* e);
+typedef void (*origOnSwipeBegin)(void*, IPointer::SSwipeBeginEvent e);
+typedef void (*origOnSwipeEnd)(void*, IPointer::SSwipeEndEvent e);
+typedef void (*origOnSwipeUpdate)(void*, IPointer::SSwipeUpdateEvent e);
 typedef void (*origCWindow_onUnmap)(void*);
 typedef void (*origStartAnim)(void*, bool in, bool left, bool instant);
 typedef void (*origFullscreenActive)(std::string args);
@@ -22,9 +24,9 @@ static double gesture_dx,gesture_previous_dx;
 static double gesture_dy,gesture_previous_dy;
 
 std::string getKeynameFromKeycode(IKeyboard::SKeyEvent e, SP<IKeyboard> pKeyboard) {
-  auto keyboard = pKeyboard->wlr();
+  auto keyboard = pKeyboard->aq();
   xkb_keycode_t keycode = e.keycode + 8;
-  xkb_keysym_t keysym = xkb_state_key_get_one_sym(keyboard->xkb_state, keycode);
+  xkb_keysym_t keysym = xkb_state_key_get_one_sym(pKeyboard->xkbStaticState, keycode);
   char *tmp_keyname = new char[64];
   xkb_keysym_get_name(keysym, tmp_keyname, 64);
   std::string keyname = tmp_keyname;
@@ -50,23 +52,23 @@ bool isKeyReleaseToggleExitOverviewHit(IKeyboard::SKeyEvent e, SP<IKeyboard> pKe
   return false;
 }
 
-static void hkOnSwipeUpdate(void* thisptr, wlr_pointer_swipe_update_event* e) {
+static void hkOnSwipeUpdate(void* thisptr, IPointer::SSwipeUpdateEvent e) {
   if(g_hycov_isOverView){
-    gesture_dx = gesture_dx + e->dx;
-    gesture_dy = gesture_dy + e->dy;
-    if(e->dx > 0 && gesture_dx - gesture_previous_dx > g_hycov_move_focus_distance){
+    gesture_dx = gesture_dx + e.delta.x;
+    gesture_dy = gesture_dy + e.delta.y;
+    if(e.delta.x > 0 && gesture_dx - gesture_previous_dx > g_hycov_move_focus_distance){
       dispatch_focusdir("r");
       gesture_previous_dx = gesture_dx;
       hycov_log(LOG,"OnSwipeUpdate hook focus right");
-    } else if(e->dx < 0 && gesture_previous_dx - gesture_dx > g_hycov_move_focus_distance){
+    } else if(e.delta.x < 0 && gesture_previous_dx - gesture_dx > g_hycov_move_focus_distance){
       dispatch_focusdir("l");
       gesture_previous_dx = gesture_dx;
       hycov_log(LOG,"OnSwipeUpdate hook focus left");
-    } else if(e->dy > 0 && gesture_dy - gesture_previous_dy > g_hycov_move_focus_distance){
+    } else if(e.delta.y > 0 && gesture_dy - gesture_previous_dy > g_hycov_move_focus_distance){
       dispatch_focusdir("d");
       gesture_previous_dy = gesture_dy;
       hycov_log(LOG,"OnSwipeUpdate hook focus down");
-    } else if(e->dy < 0 && gesture_previous_dy - gesture_dy > g_hycov_move_focus_distance){
+    } else if(e.delta.y < 0 && gesture_previous_dy - gesture_dy > g_hycov_move_focus_distance){
       dispatch_focusdir("u");
       gesture_previous_dy = gesture_dy;
       hycov_log(LOG,"OnSwipeUpdate hook focus up");
@@ -77,8 +79,8 @@ static void hkOnSwipeUpdate(void* thisptr, wlr_pointer_swipe_update_event* e) {
   (*(origOnSwipeUpdate)g_hycov_pOnSwipeUpdateHook->m_pOriginal)(thisptr, e);
 }
 
-static void hkOnSwipeBegin(void* thisptr, wlr_pointer_swipe_begin_event* e) {
-  if(e->fingers == g_hycov_swipe_fingers){
+static void hkOnSwipeBegin(void* thisptr, IPointer::SSwipeBeginEvent e) {
+  if(e.fingers == g_hycov_swipe_fingers){
     g_hycov_isGestureBegin = true;
     return;
   } 
@@ -88,7 +90,7 @@ static void hkOnSwipeBegin(void* thisptr, wlr_pointer_swipe_begin_event* e) {
   (*(origOnSwipeBegin)g_hycov_pOnSwipeBeginHook->m_pOriginal)(thisptr, e);
 }
 
-static void hkOnSwipeEnd(void* thisptr, wlr_pointer_swipe_end_event* e) {
+static void hkOnSwipeEnd(void* thisptr, IPointer::SSwipeEndEvent e) {
   gesture_dx = 0;
   gesture_previous_dx = 0;
   gesture_dy = 0;
