@@ -14,7 +14,6 @@ endif
 
 add_project_arguments(
   [
-    '-DWLR_USE_UNSTABLE', 
     '-g', '-Wall', '-Wextra', '-Wno-unused-parameter',
     '-Wno-unused-value', '-Wno-missing-field-initializers',
     '-Wno-narrowing', '-Wno-pointer-arith',
