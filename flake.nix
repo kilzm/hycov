@@ -47,8 +47,8 @@
       devShells = withPkgsFor (system: pkgs: {
         default = pkgs.mkShell.override { stdenv = pkgs.gcc13Stdenv; } {
           name = "hyprland-plugins";
-          # buildInputs = [ pkgs.hyprland ];
-          inputsFrom = [ pkgs.hycov ];
+          buildInputs = [ hyprland.packages.${system}.hyprland pkgs.cmake pkgs.clang-tools_17 ];
+          inputsFrom = [ hyprland.packages.${system}.hyprland ];
         };
       });
     };
